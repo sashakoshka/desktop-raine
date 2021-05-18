@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define TEXLEN 4
+#define TEXLEN 12
 
 #define EV_IDLE 0
 
@@ -86,9 +86,17 @@ int main(int argc, char *argv[]) {
   
   char *framesName[TEXLEN] = {
     "blank",
-    "idle_1",
     "idle_2",
-    "blink"
+    "idle_1",
+    "blink",
+    "look_n",
+    "look_ne",
+    "look_e",
+    "look_se",
+    "look_s",
+    "look_sw",
+    "look_w",
+    "look_nw"
   };
   
   SDL_Surface *framesImg[TEXLEN];
