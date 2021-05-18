@@ -6,6 +6,9 @@
 
 #define TEXLEN 3
 
+#define EV_IDLE 0
+
+#define STATE_IDLE 0
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
@@ -13,13 +16,14 @@ SDL_Event     event;
 SDL_Texture  *framesTex[TEXLEN];
 
 void frame(int);
+Uint32 idle_callback(Uint32, void*);
 
 int main(int argc, char *argv[]) {
   int mouseX = 0, mouseY = 0;
   
   // Initialize SDL
   
-  if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     printf("cant make window\n");
     goto error;
   }
@@ -88,15 +92,30 @@ int main(int argc, char *argv[]) {
   
   // Loop
   
+  int idleFrame = 0;
+  int state     = STATE_IDLE;
+  frame(1);
+  SDL_TimerID idleTimer;
+  idleTimer = SDL_AddTimer(500, idle_callback, NULL);
+  
   while(SDL_WaitEvent(&event)) {
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
-  
-    frame(1);
     
     switch (event.type) {
       case SDL_QUIT:
         goto exit;
+      
+      case SDL_USEREVENT:
+        switch(event.user.code) {
+          case EV_IDLE:
+            if(STATE_IDLE) {
+              frame(1 + idleFrame);
+              idleFrame = !idleFrame;
+            }
+            break;
+        }
+        break;
     }
   }
   
@@ -121,4 +140,18 @@ int main(int argc, char *argv[]) {
 void frame(int frame) {
   SDL_RenderCopy(renderer, framesTex[frame], NULL, NULL);
   SDL_RenderPresent(renderer);
+}
+
+Uint32 idle_callback(Uint32 interval, void *param) {
+  SDL_Event event;
+  SDL_UserEvent userevent;
+  
+  userevent.type = SDL_USEREVENT;
+  userevent.code = 0;
+
+  event.type = SDL_USEREVENT;
+  event.user = userevent;
+
+  SDL_PushEvent(&event);
+  return(interval);
 }
