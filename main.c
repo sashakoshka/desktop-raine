@@ -4,11 +4,19 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define TEXLEN 3
+#define TEXLEN 4
 
 #define EV_IDLE 0
 
-#define STATE_IDLE 0
+#define STATE_IDLE    0
+#define STATE_LOOK_N  1
+#define STATE_LOOK_NE 2
+#define STATE_LOOK_E  3
+#define STATE_LOOK_SE 4
+#define STATE_LOOK_S  5
+#define STATE_LOOK_SW 6
+#define STATE_LOOK_W  7
+#define STATE_LOOK_NW 8
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
@@ -16,7 +24,7 @@ SDL_Event     event;
 SDL_Texture  *framesTex[TEXLEN];
 
 void frame(int);
-Uint32 idle_callback(Uint32, void*);
+Uint32 idleTick(Uint32, void*);
 
 int main(int argc, char *argv[]) {
   int mouseX = 0, mouseY = 0;
@@ -51,15 +59,17 @@ int main(int argc, char *argv[]) {
   // Load assets
   
   char *unixResPath[TEXLEN] = {
-    "/usr/share/icons/desktop-raine/0.png",
-    "/usr/share/icons/desktop-raine/1.png",
-    "/usr/share/icons/desktop-raine/2.png",
+    "/usr/share/icons/desktop-raine/blank.png",
+    "/usr/share/icons/desktop-raine/idle_1.png",
+    "/usr/share/icons/desktop-raine/idle_2.png",
+    "/usr/share/icons/desktop-raine/blink.png",
   };
   
   char *genericResPath[TEXLEN] = {
-    "img/0.png",
-    "img/1.png",
-    "img/2.png",
+    "img/blank.png",
+    "img/idle_1.png",
+    "img/idle_2.png",
+    "img/blink.png",
   };
   
   SDL_Surface *icon;
@@ -92,11 +102,11 @@ int main(int argc, char *argv[]) {
   
   // Loop
   
-  int idleFrame = 0;
-  int state     = STATE_IDLE;
+  int idleFrame    = 0;
+  int blinkCounter = 0;
+  int state        = STATE_IDLE;
   frame(1);
-  SDL_TimerID idleTimer;
-  idleTimer = SDL_AddTimer(500, idle_callback, NULL);
+  SDL_AddTimer(500, idleTick, NULL);
   
   while(SDL_WaitEvent(&event)) {
     SDL_PumpEvents();
@@ -109,7 +119,12 @@ int main(int argc, char *argv[]) {
       case SDL_USEREVENT:
         switch(event.user.code) {
           case EV_IDLE:
-            if(STATE_IDLE) {
+            blinkCounter++;
+            if(blinkCounter > 6 && idleFrame) {
+              idleFrame = 2;
+              blinkCounter = 0;
+            }
+            if(state == STATE_IDLE) {
               frame(1 + idleFrame);
               idleFrame = !idleFrame;
             }
@@ -142,7 +157,7 @@ void frame(int frame) {
   SDL_RenderPresent(renderer);
 }
 
-Uint32 idle_callback(Uint32 interval, void *param) {
+Uint32 idleTick(Uint32 interval, void *param) {
   SDL_Event event;
   SDL_UserEvent userevent;
   
