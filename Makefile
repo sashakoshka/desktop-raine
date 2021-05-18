@@ -20,3 +20,6 @@ install: raine
 	install -m 755 raine /usr/bin/raine
 	install -m 755 raine.desktop /usr/share/applications/raine.desktop
 	install -m 755 img/* /usr/share/icons/desktop-raine/
+
+uninstall:
+	rm -r /usr/share/icons/desktop-raine/ /usr/bin/raine /usr/share/applications/raine.desktop

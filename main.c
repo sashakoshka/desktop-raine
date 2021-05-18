@@ -6,14 +6,18 @@
 
 #define TEXLEN 3
 
+
+SDL_Window   *window   = NULL;
+SDL_Renderer *renderer = NULL;
+SDL_Event     event;
+SDL_Texture  *framesTex[TEXLEN];
+
+void frame(int);
+
 int main(int argc, char *argv[]) {
   int mouseX = 0, mouseY = 0;
   
   // Initialize SDL
-  
-  SDL_Window   *window   = NULL;
-  SDL_Renderer *renderer = NULL;
-  SDL_Event     event;
   
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("cant make window\n");
@@ -56,16 +60,23 @@ int main(int argc, char *argv[]) {
   
   SDL_Surface *icon;
   SDL_Surface *framesImg[TEXLEN];
-  SDL_Texture *framesTex[TEXLEN];
   
-  if(access("img/0.png", F_OK) == 0) {
+  if(access(genericResPath[0], F_OK) == 0) {
     icon = IMG_Load("img/icon.png");
     for(int i = 0; i < TEXLEN; i++)
       framesImg[i] = IMG_Load(genericResPath[i]);
-  } else {
+  } else if(access(unixResPath[0], F_OK) == 0) {
     icon = IMG_Load("/usr/share/icons/desktop-raine/icon.png");
     for(int i = 0; i < TEXLEN; i++)
       framesImg[i] = IMG_Load(unixResPath[i]);
+  } else {
+    SDL_ShowSimpleMessageBox(
+      SDL_MESSAGEBOX_ERROR,
+      "Could not get images",
+      "Could not get images. Make sure program is installed.",
+      window
+    );
+    goto error;
   }
   
   SDL_SetWindowIcon(window, icon);
@@ -81,14 +92,11 @@ int main(int argc, char *argv[]) {
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
   
-    SDL_RenderCopy(renderer, framesTex[1], NULL, NULL);
-    SDL_RenderPresent(renderer);
+    frame(1);
     
-    while(SDL_PollEvent(&event)) {
-      switch (event.type) {
-        case SDL_QUIT:
-          goto exit;
-      }
+    switch (event.type) {
+      case SDL_QUIT:
+        goto exit;
     }
   }
   
@@ -104,4 +112,13 @@ int main(int argc, char *argv[]) {
   
   error:
   return 1;
+}
+
+/*
+  frame
+  Draws the specified frame to screen
+*/
+void frame(int frame) {
+  SDL_RenderCopy(renderer, framesTex[frame], NULL, NULL);
+  SDL_RenderPresent(renderer);
 }
