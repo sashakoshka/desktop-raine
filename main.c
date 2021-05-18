@@ -91,6 +91,7 @@ int main(int argc, char *argv[]) {
     "blink"
   };
   
+  SDL_Surface *framesImg[TEXLEN];
   char resPaths[TEXLEN][128] = {0};
   for(int i = 0; i < TEXLEN; i++) {
     catstr(
@@ -101,47 +102,6 @@ int main(int argc, char *argv[]) {
         framesName[i]),
       ".png"
     );
-    printf("%s\n", resPaths[i]);
-  }
-  
-  SDL_Surface *framesImg[TEXLEN];
-  
-  /*
-  char *unixResPath[TEXLEN] = {
-    "/usr/share/icons/desktop-raine/blank.png",
-    "/usr/share/icons/desktop-raine/idle_1.png",
-    "/usr/share/icons/desktop-raine/idle_2.png",
-    "/usr/share/icons/desktop-raine/blink.png",
-  };
-  
-  char *genericResPath[TEXLEN] = {
-    "img/blank.png",
-    "img/idle_1.png",
-    "img/idle_2.png",
-    "img/blink.png",
-  };
-  
-  
-  if(access(genericResPath[0], F_OK) == 0) {
-    icon = IMG_Load("img/icon.png");
-    for(int i = 0; i < TEXLEN; i++)
-      framesImg[i] = IMG_Load(genericResPath[i]);
-  } else if(access(unixResPath[0], F_OK) == 0) {
-    icon = IMG_Load("/usr/share/icons/desktop-raine/icon.png");
-    for(int i = 0; i < TEXLEN; i++)
-      framesImg[i] = IMG_Load(unixResPath[i]);
-  } else {
-    SDL_ShowSimpleMessageBox(
-      SDL_MESSAGEBOX_ERROR,
-      "Could not get images",
-      "Could not get images. Make sure program is installed.",
-      window
-    );
-    goto error;
-  }
-  */
-  
-  for(int i = 0; i < TEXLEN; i++) {
     framesImg[i] = IMG_Load(resPaths[i]);
     framesTex[i] = SDL_CreateTextureFromSurface(
       renderer, framesImg[i]
