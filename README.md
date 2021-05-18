@@ -1,5 +1,7 @@
 # Desktop Raine
 
+![Raine!](img/1.png)
+
 Raine from TwoKinds, right on your desktop! Made using C and SDL2. Currently in very early development.
 
 ## Build instructions:
