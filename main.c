@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define TEXLEN 12
+#define TEXLEN 13
 
 #define EV_IDLE 0
 #define EV_LOOK 1
@@ -81,17 +81,21 @@ int main(int argc, char *argv[]) {
   
   char *framesName[TEXLEN] = {
     "blank",
-    "idle_2",
     "idle_1",
+    "idle_2",
     "blink",
+    
+    "look_nw",
     "look_n",
     "look_ne",
-    "look_e",
-    "look_se",
-    "look_s",
-    "look_sw",
+    
     "look_w",
-    "look_nw"
+    "idle_1",
+    "look_e",
+    
+    "look_sw",
+    "look_s",
+    "look_se"
   };
   
   SDL_Surface *framesImg[TEXLEN];
@@ -118,6 +122,7 @@ int main(int argc, char *argv[]) {
   int lookCounter  = 0;
   int state        = STATE_IDLE;
   frame(1);
+  // Fire EV_IDLE every half second
   SDL_AddTimer(500, idleTick, NULL);
   
   while(SDL_WaitEvent(&event)) {
@@ -129,11 +134,31 @@ int main(int argc, char *argv[]) {
       case SDL_QUIT:
         goto exit;
       
+      case SDL_MOUSEMOTION:
+        if(state <= STATE_LOOK) {
+          lookCounter = 1;
+          state = STATE_LOOK;
+          int lookDirection = 0;
+          lookDirection += mouseY > 32;
+          lookDirection += mouseY > 44;
+          lookDirection *= 3;
+          lookDirection += 4;
+          lookDirection += mouseX > 48;
+          lookDirection += mouseX> 96;
+          frame(lookDirection);
+        }
+        break;
+      
       case SDL_USEREVENT:
         switch(event.user.code) {
           case EV_IDLE:
             blinkCounter++;
-            if(lookCounter > 0) lookCounter--;
+            
+            if(lookCounter > 0)
+              lookCounter--;
+            else if(state == STATE_LOOK)
+              state = STATE_IDLE;
+            
             if(blinkCounter > 6 && idleFrame) {
               idleFrame = 2;
               blinkCounter = 0;
@@ -175,12 +200,16 @@ void frame(int frame) {
   SDL_RenderPresent(renderer);
 }
 
+/*
+  idleTick
+  Callback to fire an EV_IDLE code.
+*/
 Uint32 idleTick(Uint32 interval, void *param) {
   SDL_Event event;
   SDL_UserEvent userevent;
   
   userevent.type = SDL_USEREVENT;
-  userevent.code = 0;
+  userevent.code = EV_IDLE;
 
   event.type = SDL_USEREVENT;
   event.user = userevent;
