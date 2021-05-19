@@ -12,7 +12,7 @@ run: clean raine
 clean:
 	rm -f raine raine~
 
-install: raine
+install: clean raine
 	install -d /usr/bin/
 	install -d /usr/share/applications/
 	install -d /usr/share/icons/desktop-raine

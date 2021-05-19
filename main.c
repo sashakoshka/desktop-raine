@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
   } else if(access(genericResPath, F_OK) == 0) {
     resPath = genericResPath;
   } else if(access(unixResPath, F_OK) == 0) {
-    resPath = genericResPath;
+    resPath = unixResPath;
   } else {
     SDL_ShowSimpleMessageBox(
       SDL_MESSAGEBOX_ERROR,
