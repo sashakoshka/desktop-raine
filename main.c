@@ -7,16 +7,10 @@
 #define TEXLEN 12
 
 #define EV_IDLE 0
+#define EV_LOOK 1
 
 #define STATE_IDLE    0
-#define STATE_LOOK_N  1
-#define STATE_LOOK_NE 2
-#define STATE_LOOK_E  3
-#define STATE_LOOK_SE 4
-#define STATE_LOOK_S  5
-#define STATE_LOOK_SW 6
-#define STATE_LOOK_W  7
-#define STATE_LOOK_NW 8
+#define STATE_LOOK    1
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
@@ -28,7 +22,8 @@ char* catstr(char*, char*);
 Uint32 idleTick(Uint32, void*);
 
 int main(int argc, char *argv[]) {
-  int mouseX = 0, mouseY = 0;
+  int mouseX = 0, mouseY = 0,
+      winX   = 0, winY   = 0;
   
   // Initialize SDL
   
@@ -120,6 +115,7 @@ int main(int argc, char *argv[]) {
   
   int idleFrame    = 0;
   int blinkCounter = 0;
+  int lookCounter  = 0;
   int state        = STATE_IDLE;
   frame(1);
   SDL_AddTimer(500, idleTick, NULL);
@@ -127,6 +123,7 @@ int main(int argc, char *argv[]) {
   while(SDL_WaitEvent(&event)) {
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
+    SDL_GetWindowPosition(window, &winX, &winY);
     
     switch (event.type) {
       case SDL_QUIT:
@@ -136,6 +133,7 @@ int main(int argc, char *argv[]) {
         switch(event.user.code) {
           case EV_IDLE:
             blinkCounter++;
+            if(lookCounter > 0) lookCounter--;
             if(blinkCounter > 6 && idleFrame) {
               idleFrame = 2;
               blinkCounter = 0;
@@ -144,6 +142,10 @@ int main(int argc, char *argv[]) {
               frame(1 + idleFrame);
               idleFrame = !idleFrame;
             }
+            break;
+          
+          case EV_LOOK:
+            lookCounter = 5;
             break;
         }
         break;
