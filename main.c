@@ -80,20 +80,21 @@ int main(int argc, char *argv[]) {
   SDL_SetWindowIcon(window, icon);
   
   char *framesName[TEXLEN] = {
-    "blank",
-    "idle_1",
+    "blank",  // nothing
+    
+    "idle_1", // ide animation
     "idle_2",
     "blink",
     
-    "look_nw",
+    "look_nw", // north lookaround
     "look_n",
     "look_ne",
     
-    "look_w",
+    "look_w", // middle lookaround
     "idle_1",
     "look_e",
     
-    "look_sw",
+    "look_sw", // south lookaround
     "look_s",
     "look_se"
   };
@@ -152,16 +153,15 @@ int main(int argc, char *argv[]) {
       case SDL_USEREVENT:
         switch(event.user.code) {
           case EV_IDLE:
-            blinkCounter++;
-            
             if(lookCounter > 0)
               lookCounter--;
             else if(state == STATE_LOOK)
               state = STATE_IDLE;
             
-            if(blinkCounter > 6 && idleFrame) {
+            blinkCounter--;
+            if(blinkCounter < 0 && idleFrame) {
               idleFrame = 2;
-              blinkCounter = 0;
+              blinkCounter = 6;
             }
             if(state == STATE_IDLE) {
               frame(1 + idleFrame);

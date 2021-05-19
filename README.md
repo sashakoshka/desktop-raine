@@ -1,6 +1,6 @@
 # Desktop Raine
 
-![Raine!](img/idle_1.png)
+![Raine!](preview.gif)
 
 Raine from TwoKinds, right on your desktop! Made using C and SDL2. Currently in very early development. Artwork by boe from the Raine Fanclub server.
 
