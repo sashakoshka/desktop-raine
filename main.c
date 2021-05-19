@@ -3,14 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
 
-#define TEXLEN 13
+#define TEXLEN 21
 
 #define EV_IDLE 0
 #define EV_LOOK 1
 
 #define STATE_IDLE    0
 #define STATE_LOOK    1
+#define STATE_WALK    2
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
@@ -32,7 +34,7 @@ int main(int argc, char *argv[]) {
     goto error;
   }
   
-  window = SDL_CreateWindow("",
+  window = SDL_CreateWindow("Desktop Raine",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
     118, 223, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP
   );
@@ -40,6 +42,8 @@ int main(int argc, char *argv[]) {
     printf("%s\n", SDL_GetError());
     goto error;
   }
+  
+  SDL_SetWindowBordered(window, SDL_FALSE);
   
   renderer = SDL_CreateRenderer(
     window,
@@ -50,12 +54,13 @@ int main(int argc, char *argv[]) {
     goto error;
   }
   
-  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  //SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   
   // Load assets
   
   char *genericResPath = "img/";
-  char *unixResPath    = "/usr/share/icons/desktop-raine/";
+  char *unixResPath = "/usr/share/icons/desktop-raine/";
+  char *winResPath = "C:\\Program Files\\Desktop Raine\\img\\";
   char *resPath;
   char iconPath[128]   = {0};
   
@@ -65,14 +70,10 @@ int main(int argc, char *argv[]) {
     resPath = genericResPath;
   } else if(access(unixResPath, F_OK) == 0) {
     resPath = unixResPath;
+  } else if(access(winResPath, F_OK) == 0) {
+    resPath = winResPath;
   } else {
-    SDL_ShowSimpleMessageBox(
-      SDL_MESSAGEBOX_ERROR,
-      "Could not get images",
-      "Could not get images. Make sure program is installed.",
-      window
-    );
-    goto error;
+    goto res_error;
   }
   
   catstr(catstr(iconPath, resPath), "icon.png");
@@ -80,23 +81,33 @@ int main(int argc, char *argv[]) {
   SDL_SetWindowIcon(window, icon);
   
   char *framesName[TEXLEN] = {
-    "blank",  // nothing
+    "blank",    // nothing
     
-    "idle_1", // ide animation
-    "idle_2",
+    "idle_2",   // ide animation
+    "idle_1",
     "blink",
     
-    "look_nw", // north lookaround
+    "look_nw",  // north lookaround
     "look_n",
     "look_ne",
     
-    "look_w", // middle lookaround
+    "look_w",   // middle lookaround
     "idle_1",
     "look_e",
     
-    "look_sw", // south lookaround
+    "look_sw",  // south lookaround
     "look_s",
-    "look_se"
+    "look_se",
+    
+    "walk_l_1", // left walk
+    "walk_l_2",
+    "walk_l_3",
+    "walk_l_4",
+    
+    "walk_r_1", // right walk
+    "walk_r_2",
+    "walk_r_3",
+    "walk_r_4"
   };
   
   SDL_Surface *framesImg[TEXLEN];
@@ -110,19 +121,29 @@ int main(int argc, char *argv[]) {
         framesName[i]),
       ".png"
     );
+    printf("loading %s\n", resPaths[i]);
     framesImg[i] = IMG_Load(resPaths[i]);
+    if(framesImg[i] == NULL) goto res_error;
     framesTex[i] = SDL_CreateTextureFromSurface(
       renderer, framesImg[i]
     );
   }
+  
+  time_t t;
+  srand((unsigned)time(&t));
   
   // Loop
   
   int idleFrame    = 0;
   int blinkCounter = 0;
   int lookCounter  = 0;
+  int walkFrame    = 0;
+  int       walkVX = 16,
+            walkVY = 0;
+  int walkCounter  = 0;
   int state        = STATE_IDLE;
   frame(1);
+  
   // Fire EV_IDLE every half second
   SDL_AddTimer(500, idleTick, NULL);
   
@@ -153,20 +174,59 @@ int main(int argc, char *argv[]) {
       case SDL_USEREVENT:
         switch(event.user.code) {
           case EV_IDLE:
-            if(lookCounter > 0)
-              lookCounter--;
-            else if(state == STATE_LOOK)
-              state = STATE_IDLE;
+            switch(state) {
+              case STATE_IDLE:
+                // Currently idling - standing and blinking
+                blinkCounter--;
+                if(blinkCounter < 0 && idleFrame) {
+                  idleFrame = 2;
+                  blinkCounter = 6;
+                }
+                if(state == STATE_IDLE) {
+                  frame(1 + idleFrame);
+                  idleFrame = !idleFrame;
+                }
+                // Decide to walk every once in a while
+                if(rand() % 32 == 0) {
+                  walkCounter = rand() % 32;
+                  state = STATE_WALK;
+                }
+                break;
+              
+              case STATE_LOOK:
+                if(lookCounter > 0)
+                  lookCounter--;
+                else {
+                  /* Lose interest in mouse, blink and return to
+                  idle state */
+                  state = STATE_IDLE;
+                  blinkCounter = 0;
+                  idleFrame = 1;
+                }
+                break;
+              
+              case STATE_WALK:
+                // Walk around the screen
+                SDL_SetWindowPosition(
+                  window,
+                  winX + walkVX,
+                  winY + walkVY
+                );
+                frame(13 + 4 * (walkVX > 0) + walkFrame);
+                walkFrame++;
+                walkFrame %= 4;
+                if(rand() % 8 == 0) {
+                  walkVX = (rand() % 2) * 32 - 16;
+                  walkVY = (rand() % 32) - 16;
+                }
+                if(walkCounter > 0)
+                  walkCounter--;
+                else
+                  state = STATE_IDLE;
+                break;
+            }
             
-            blinkCounter--;
-            if(blinkCounter < 0 && idleFrame) {
-              idleFrame = 2;
-              blinkCounter = 6;
-            }
-            if(state == STATE_IDLE) {
-              frame(1 + idleFrame);
-              idleFrame = !idleFrame;
-            }
+            
             break;
           
           case EV_LOOK:
@@ -187,6 +247,14 @@ int main(int argc, char *argv[]) {
   SDL_Quit();
   return 0;
   
+  res_error:
+  SDL_ShowSimpleMessageBox(
+    SDL_MESSAGEBOX_ERROR,
+    "Could not get images",
+    "Could not get images. Make sure program is installed.",
+    window
+  );
+  
   error:
   return 1;
 }
@@ -196,6 +264,8 @@ int main(int argc, char *argv[]) {
   Draws the specified frame to screen
 */
 void frame(int frame) {
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, framesTex[frame], NULL, NULL);
   SDL_RenderPresent(renderer);
 }
