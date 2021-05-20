@@ -5,14 +5,15 @@
 #include <unistd.h>
 #include <time.h>
 
-#define TEXLEN 21
+#define TEXLEN 22
 
 #define EV_IDLE 0
 #define EV_LOOK 1
 
-#define STATE_IDLE    0
-#define STATE_LOOK    1
-#define STATE_WALK    2
+#define STATE_IDLE 0
+#define STATE_LOOK 1
+#define STATE_WALK 2
+#define STATE_BOOP 3
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
@@ -107,7 +108,9 @@ int main(int argc, char *argv[]) {
     "walk_r_1", // right walk
     "walk_r_2",
     "walk_r_3",
-    "walk_r_4"
+    "walk_r_4",
+    
+    "boop"
   };
   
   SDL_Surface *framesImg[TEXLEN];
@@ -156,6 +159,21 @@ int main(int argc, char *argv[]) {
       case SDL_QUIT:
         goto exit;
       
+      case SDL_MOUSEBUTTONDOWN:
+        switch(event.button.button) {
+          case SDL_BUTTON_LEFT:
+            if(mouseX > 48 && mouseX < 84 && mouseY < 80) {
+              lookCounter = 1;
+              state = STATE_BOOP;
+              frame(21);
+            }
+            break;
+          case SDL_BUTTON_RIGHT:
+            
+            break;
+        }
+        break;
+      
       case SDL_MOUSEMOTION:
         if(state <= STATE_LOOK) {
           lookCounter = 1;
@@ -166,7 +184,7 @@ int main(int argc, char *argv[]) {
           lookDirection *= 3;
           lookDirection += 4;
           lookDirection += mouseX > 48;
-          lookDirection += mouseX> 96;
+          lookDirection += mouseX > 84;
           frame(lookDirection);
         }
         break;
@@ -187,12 +205,15 @@ int main(int argc, char *argv[]) {
                   idleFrame = !idleFrame;
                 }
                 // Decide to walk every once in a while
-                if(rand() % 32 == 0) {
+                if(rand() % 24 == 0) {
                   walkCounter = rand() % 32;
+                  walkVX = (rand() % 2) * 32 - 16;
+                  walkVY = (rand() % 32) - 16;
                   state = STATE_WALK;
                 }
                 break;
               
+              case STATE_BOOP:
               case STATE_LOOK:
                 if(lookCounter > 0)
                   lookCounter--;
