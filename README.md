@@ -11,6 +11,7 @@ Raine from TwoKinds, right on your desktop! Made using C and SDL2. Currently in 
 #### Dependencies
 * SDL2
 * A C compiler (such as gcc)
+* Make
 
 #### Targets
 * `make` - gives you a binary called "raine"
