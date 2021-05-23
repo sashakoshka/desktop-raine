@@ -14,10 +14,11 @@ Raine from TwoKinds, right on your desktop! Made using C and SDL2. Currently in 
 * Make
 
 #### Targets
-* `make` - gives you a binary called "raine"
-* `make run` - builds and runs raine
-* `make clean` - removes the binary
-* `make install` - imbues your system with raine
+* `make` - Gives you a binary called "raine"
+* `make run` - Builds and runs raine
+* `make clean` - Removes the binary
+* `make install` - Imbues your system with raine
+* `make un-` Why would you need an uninstall target? Stop asking questions.
 
 ### Windows
 
