@@ -2,7 +2,7 @@
 Name=Desktop Raine
 Comment=Raine from TwoKinds, right on your desktop!
 Exec=raine
-Icon=/usr/share/icons/desktop-raine/icon.png
+Icon=/usr/share/icons/desktop-raine/icon.bmp
 Terminal=false
 Type=Application
 Categories=Game
