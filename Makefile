@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
-LIBS=-L/usr/local/lib -lSDL2 -lSDL2_image
+LIBS=-L/usr/local/lib -lSDL2
 
 raine:
 	$(CC) main.c -o raine $(CFLAGS) $(LIBS)

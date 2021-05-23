@@ -1,5 +1,4 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -17,6 +16,7 @@
 
 SDL_Window   *window   = NULL;
 SDL_Renderer *renderer = NULL;
+SDL_Surface  *surface  = NULL;
 SDL_Event     event;
 SDL_Texture  *framesTex[TEXLEN];
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   }
   
   catstr(catstr(iconPath, resPath), "icon.png");
-  SDL_Surface *icon = IMG_Load(iconPath);
+  SDL_Surface *icon = SDL_LoadBMP(iconPath);
   SDL_SetWindowIcon(window, icon);
   
   char *framesName[TEXLEN] = {
@@ -122,10 +122,10 @@ int main(int argc, char *argv[]) {
           resPaths[i],
           resPath),
         framesName[i]),
-      ".png"
+      ".bmp"
     );
     printf("loading %s\n", resPaths[i]);
-    framesImg[i] = IMG_Load(resPaths[i]);
+    framesImg[i] = SDL_LoadBMP(resPaths[i]);
     if(framesImg[i] == NULL) goto res_error;
     framesTex[i] = SDL_CreateTextureFromSurface(
       renderer, framesImg[i]
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
   Draws the specified frame to screen
 */
 void frame(int frame) {
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_SetRenderDrawColor(renderer, 80, 120, 180, 0);
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, framesTex[frame], NULL, NULL);
   SDL_RenderPresent(renderer);
