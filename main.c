@@ -19,6 +19,8 @@ SDL_Renderer *renderer = NULL;
 SDL_Surface  *surface  = NULL;
 SDL_Event     event;
 SDL_Texture  *framesTex[TEXLEN];
+SDL_Surface  *framesImg[TEXLEN];
+SDL_Rect      winRect = {0, 0, 118, 223};
 
 void frame(int);
 char* catstr(char*, char*);
@@ -43,7 +45,6 @@ int main(int argc, char *argv[]) {
     printf("%s\n", SDL_GetError());
     goto error;
   }
-  
   SDL_SetWindowBordered(window, SDL_FALSE);
   
   renderer = SDL_CreateRenderer(
@@ -54,6 +55,8 @@ int main(int argc, char *argv[]) {
     printf("%s\n", SDL_GetError());
     goto error;
   }
+  
+  surface = SDL_GetWindowSurface(window);
   
   //SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   
@@ -77,7 +80,7 @@ int main(int argc, char *argv[]) {
     goto res_error;
   }
   
-  catstr(catstr(iconPath, resPath), "icon.png");
+  catstr(catstr(iconPath, resPath), "icon.bmp");
   SDL_Surface *icon = SDL_LoadBMP(iconPath);
   SDL_SetWindowIcon(window, icon);
   
@@ -110,10 +113,9 @@ int main(int argc, char *argv[]) {
     "walk_r_3",
     "walk_r_4",
     
-    "boop"
+    "boop"      // click
   };
   
-  SDL_Surface *framesImg[TEXLEN];
   char resPaths[TEXLEN][128] = {0};
   for(int i = 0; i < TEXLEN; i++) {
     catstr(
@@ -127,6 +129,10 @@ int main(int argc, char *argv[]) {
     printf("loading %s\n", resPaths[i]);
     framesImg[i] = SDL_LoadBMP(resPaths[i]);
     if(framesImg[i] == NULL) goto res_error;
+    SDL_SetColorKey(
+      framesImg[i], SDL_TRUE,
+      SDL_MapRGB( framesImg[i]->format, 0xFF, 0, 0xFF )
+    );
     framesTex[i] = SDL_CreateTextureFromSurface(
       renderer, framesImg[i]
     );
