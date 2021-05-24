@@ -80,6 +80,15 @@ int main(int argc, char *argv[]) {
     goto res_error;
   }
   
+  int noSlash = 0;
+  while(resPath[noSlash]) noSlash++;
+  noSlash--;
+  noSlash = !(
+    resPath[noSlash] == '/' ||
+    resPath[noSlash] == '\\'
+  );
+  printf("%i\n", noSlash);
+  
   catstr(catstr(iconPath, resPath), "icon.bmp");
   SDL_Surface *icon = SDL_LoadBMP(iconPath);
   SDL_SetWindowIcon(window, icon);
@@ -117,16 +126,16 @@ int main(int argc, char *argv[]) {
   };
   
   char resPaths[TEXLEN][128] = {0};
+  char* bookmark;
   for(int i = 0; i < TEXLEN; i++) {
-    catstr(
-      catstr(
-        catstr(
-          resPaths[i],
-          resPath),
-        framesName[i]),
-      ".bmp"
-    );
+    // Manupulate strings to build file path
+    bookmark = catstr(resPaths[i], resPath);
+    if(noSlash) bookmark = catstr(bookmark, "/");
+    catstr(catstr(bookmark, framesName[i]), ".bmp");
+    
     printf("loading %s\n", resPaths[i]);
+    
+    // Load the image and color key it
     framesImg[i] = SDL_LoadBMP(resPaths[i]);
     if(framesImg[i] == NULL) goto res_error;
     SDL_SetColorKey(
@@ -138,6 +147,7 @@ int main(int argc, char *argv[]) {
     );
   }
   
+  // Set random number
   time_t t;
   srand((unsigned)time(&t));
   
@@ -157,7 +167,9 @@ int main(int argc, char *argv[]) {
   SDL_AddTimer(500, idleTick, NULL);
   
   while(SDL_WaitEvent(&event)) {
+    // Shuffle random generator
     rand();
+    // Get inputs
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
     SDL_GetWindowPosition(window, &winX, &winY);
@@ -183,7 +195,9 @@ int main(int argc, char *argv[]) {
         break;
       
       case SDL_MOUSEMOTION:
+        // Shuffle random generator
         rand();
+        // Draw appropriate frame
         if(state <= STATE_LOOK) {
           lookCounter = 1;
           state = STATE_LOOK;
