@@ -157,6 +157,7 @@ int main(int argc, char *argv[]) {
   SDL_AddTimer(500, idleTick, NULL);
   
   while(SDL_WaitEvent(&event)) {
+    rand();
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
     SDL_GetWindowPosition(window, &winX, &winY);
@@ -166,6 +167,7 @@ int main(int argc, char *argv[]) {
         goto exit;
       
       case SDL_MOUSEBUTTONDOWN:
+        rand();
         switch(event.button.button) {
           case SDL_BUTTON_LEFT:
             if(mouseX > 48 && mouseX < 84 && mouseY < 80) {
@@ -181,6 +183,7 @@ int main(int argc, char *argv[]) {
         break;
       
       case SDL_MOUSEMOTION:
+        rand();
         if(state <= STATE_LOOK) {
           lookCounter = 1;
           state = STATE_LOOK;
